@@ -1,0 +1,117 @@
+---
+- name: install fluentd logging monitor
+  become: true
+  become_user: root
+  become_method: sudo
+  get_url:
+    url: https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+    dest: /usr/local/bin
+    mode: 0777
+- name: Executing script
+  command: sh /usr/local/bin add-google-cloud-ops-agent-repo.sh
+- name: cloudsql install
+  become_user: root
+  become_method: sudo
+  stat:
+    path: /usr/local/bin/cloud_sql_proxy
+  register: cloud_sql_proxy_bin
+- name: installing cloud_sql_proxy
+  become: true
+  become_user: root
+  become_method: sudo
+  get_url:
+    url: https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+    dest: /usr/local/bin/cloud_sql_proxy
+    owner: root
+    group: root
+    mode: 0755
+- name: cloud_sql_proxy as a service
+  become: true
+  template:
+    src: cloud-sql-proxy.service.j2
+    dest: /etc/systemd/system/cloud-sql-proxy.service
+    owner: root
+    group: root
+    mode: 0644
+  register: cloud_sql_proxy_service_update
+- name: enable proxy service
+  become: true
+  systemd:
+    name: cloud-sql-proxy
+    enabled: "yes"
+    state: started
+    daemon_reload: "yes"
+- name: git pull
+  become: true
+  become_user: root
+  become_method: sudo
+  git:
+   repo: https://github.com/GoogleCloudPlatform/getting-started-python
+   dest: /opt/app
+   version: steps
+   clone: yes
+   update: no
+- name: procfile
+  become: true
+  template:
+     src: procfile.j2
+     dest: /opt/app/7-gce/procfile
+     owner: root
+     group: root
+     mode: 0644
+- name: adding user
+  become: true
+  user: 
+    name: pythonapp
+    home: /home
+- name: giving ownership
+  become: true
+  file:
+    path: /opt/app
+    owner: pythonapp
+    group: pythonapp
+- name: jinja template configuration
+  become: true
+  template:
+     src: bookshelftemplate.j2
+     dest: /opt/app/7-gce/config.py
+- name: installing dependencies
+  become: true
+  apt:
+    update_cache: true
+    state: latest
+    pkg:
+    - git
+    - supervisor
+    - python
+    - python-pip
+    - python3-pip
+    - python-dev
+    - build-essential
+    - libffi-dev
+    - libssl-dev
+- name: virtualenv install
+  become: true
+  pip:
+    name: virtualenv
+- name: dependencies install
+  become: true
+  pip:
+   virtualenv: /opt/app/7-gce/env
+   virtualenv_python: python3
+   requirements: /opt/app/7-gce/requirements.txt
+   extra_args: "--prefer-binary"
+- name: running python file cloud_sql.py
+  become: true
+  command: /opt/app/7-gce/env/bin/python /opt/app/7-gce/bookshelf/model_cloudsql.py
+- name: supervisor template
+  become: true
+  template:
+     src: supervisortemplate.j2
+     dest: /etc/supervisor/conf.d/python-app.conf
+     mode: 0644
+- name: configuring supervisor
+  become: true
+  supervisorctl:
+       name: pythonapp
+       state: restarted
