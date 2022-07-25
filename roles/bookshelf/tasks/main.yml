@@ -81,15 +81,15 @@
     update_cache: true
     state: latest
     pkg:
-    - git
-    - supervisor
-    - python
-    - python-pip
-    - python3-pip
-    - python-dev
-    - build-essential
-    - libffi-dev
-    - libssl-dev
+     - git
+     - supervisor
+     - python
+     - python-pip
+     - python3-pip
+     - python-dev
+     - build-essential
+     - libffi-dev
+     - libssl-dev
 - name: virtualenv install
   become: true
   pip:
