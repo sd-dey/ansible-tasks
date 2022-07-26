@@ -13,7 +13,7 @@ After=networking.service
 [Service]
 Type=simple
 WorkingDirectory=/usr/local/bin
-ExecStart=/usr/local/bin/cloud_sql_proxy -instances=arcane-bit-349310:us-central1:sql-instance=tcp:3306
+ExecStart=/usr/local/bin/cloud_sql_proxy -instances=arcane-bit-349310:us-central1:sd25=tcp:3306
 Restart=always
 StandardOutput=journal
 User=root
