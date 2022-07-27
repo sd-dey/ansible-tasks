@@ -9,7 +9,7 @@
     mode: 0777
 - name: Executing script
   become: true
-  command: bash /usr/local/bin add-google-cloud-ops-agent-repo.sh --also-install
+  command: bash /usr/local/bin/add-google-cloud-ops-agent-repo.sh 
 - name: cloudsql install
   become: true
   become_user: root
