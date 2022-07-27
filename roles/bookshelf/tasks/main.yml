@@ -103,7 +103,10 @@
    extra_args: "--prefer-binary"
 - name: running python file cloud_sql.py
   become: true
-  command: /opt/app/7-gce/env/bin/python /opt/app/7-gce/bookshelf/model_cloudsql.py
+  command: /opt/app/7-gce/env/bin/python 
+- name: running python file-1 cloud_sql.py
+  become: true
+  command: /opt/app/7-gce/bookshelf/model_cloudsql.py
 - name: supervisor template
   become: true
   template:
