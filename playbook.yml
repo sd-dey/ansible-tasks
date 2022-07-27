@@ -11,6 +11,6 @@
     user: "'root'"
     password: "'1234'"
     database: "'dey'"
-    connection_name: "'arcane-bit-349310:us-central1:sd31'"
+    connection_name: "'arcane-bit-349310:us-central1:sd32'"
     bucket: "'tf-static-bucket-1s'"
     port: "8080"
