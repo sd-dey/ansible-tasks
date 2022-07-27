@@ -4,13 +4,13 @@
   become_user: root
   become_method: sudo
   roles:
-    - bookshelf
+    - role: bookshelf
   vars:
     backend: "'cloudsql'"
     project_id: "'arcane-bit-349310'"
     user: "'root'"
     password: "'1234'"
     database: "'dey'"
-    connection_name: "'arcane-bit-349310:us-central1:sd25'"
-    bucket: "'tf-static-bucket-1s'"
+    connection_name: "'arcane-bit-349310:us-central1:ansible-dey'"
+    bucket: "'my_bucket_new1'"
     port: "8080"

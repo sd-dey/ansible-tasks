@@ -8,10 +8,11 @@
     dest: /usr/local/bin
     mode: 0777
 - name: Executing script
-  command: sh /usr/local/bin add-google-cloud-ops-agent-repo.sh
+  become: true
+  command: bash /usr/local/bin add-google-cloud-ops-agent-repo.sh --also-install
 - name: cloudsql install
+  become: true
   become_user: root
-  become_method: sudo
   stat:
     path: /usr/local/bin/cloud_sql_proxy
   register: cloud_sql_proxy_bin
@@ -25,10 +26,10 @@
     owner: root
     group: root
     mode: 0755
-- name: cloud_sql_proxy as a service
+- name: cloud-sql-proxy as a service
   become: true
   template:
-    src: cloud-sql-proxy.service.j2
+    src: cloud.j2
     dest: /etc/systemd/system/cloud-sql-proxy.service
     owner: root
     group: root
@@ -39,8 +40,24 @@
   systemd:
     name: cloud-sql-proxy
     enabled: "yes"
-    state: started
     daemon_reload: "yes"
+    state: started
+- name: installing dependencies
+  become: true
+  apt:
+    update_cache: true
+    state: latest
+    pkg:
+     - git
+     - supervisor
+     - python
+     - python-dev
+     - python-pip
+     - python3-pip
+     - python3
+     - build-essential
+     - libffi-dev
+     - libssl-dev
 - name: git pull
   become: true
   become_user: root
@@ -63,7 +80,7 @@
   become: true
   user: 
     name: pythonapp
-    home: /home
+    home: /home/pythonapp
 - name: giving ownership
   become: true
   file:
@@ -75,21 +92,7 @@
   template:
      src: bookshelftemplate.j2
      dest: /opt/app/7-gce/config.py
-- name: installing dependencies
-  become: true
-  apt:
-    update_cache: true
-    state: latest
-    pkg:
-     - git
-     - supervisor
-     - python
-     - python-pip
-     - python3-pip
-     - python-dev
-     - build-essential
-     - libffi-dev
-     - libssl-dev
+
 - name: virtualenv install
   become: true
   pip:
@@ -103,12 +106,7 @@
    extra_args: "--prefer-binary"
 - name: running python file cloud_sql.py
   become: true
-  command: /opt/app/7-gce/env/bin/python 
-- name: running python file-1 cloud_sql.py
-  become: true
-  become_user: root
-  become_method: sudo
-  command: /opt/app/7-gce/bookshelf/model_cloudsql.py
+  command: /opt/app/7-gce/env/bin/python /opt/app/7-gce/bookshelf/model_cloudsql.py
 - name: supervisor template
   become: true
   template:
